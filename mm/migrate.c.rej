@@ -1,0 +1,33 @@
+diff a/mm/migrate.c b/mm/migrate.c	(rejected hunks)
+@@ -2200,6 +2220,7 @@ int migrate_misplaced_page(struct page *page, struct vm_area_struct *vma,
+ 	pg_data_t *pgdat = NODE_DATA(node);
+ 	int isolated;
+ 	int nr_remaining;
++	bool is_file;
+ 	LIST_HEAD(migratepages);
+ 
+ 	/*
+@@ -2209,18 +2230,15 @@ int migrate_misplaced_page(struct page *page, struct vm_area_struct *vma,
+ 	if (is_shared_exec_page(vma, page))
+ 		goto out;
+ 
+-	/*
+-	 * Also do not migrate dirty pages as not all filesystems can move
+-	 * dirty pages in MIGRATE_ASYNC mode which is a waste of cycles.
+-	 */
+-	if (page_is_file_lru(page) && PageDirty(page))
+-		goto out;
+-
+ 	isolated = numamigrate_isolate_page(pgdat, page);
+-	if (!isolated)
++	if (!isolated) {
++		count_vm_events(PGMIGRATE_NUMA_ISOLATE_FAIL, thp_nr_pages(page));
+ 		goto out;
++	}
+ 
++	is_file = page_is_file_lru(page);
+ 	list_add(&page->lru, &migratepages);
++	count_vm_numa_event(PGPROMOTE_TRIED);
+ 	nr_remaining = migrate_pages(&migratepages, alloc_misplaced_dst_page,
+ 				     NULL, node, MIGRATE_ASYNC,
+ 				     MR_NUMA_MISPLACED, NULL);
