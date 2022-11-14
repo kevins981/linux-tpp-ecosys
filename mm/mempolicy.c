@@ -1945,7 +1945,7 @@ static unsigned next_node_tier(int nid, struct mempolicy *policy, bool toptier)
 	unsigned next, start = nid;
 
 	do {
-		next = next_node_in(next, policy->nodes);
+		next = next_node_in(next, policy->v.nodes);
 		if (next == MAX_NUMNODES)
 			break;
 		if (toptier == node_is_toptier(next))
@@ -1975,7 +1975,7 @@ static unsigned interleave_nodes(struct mempolicy *policy)
 		    numa_tier_interleave[0] + numa_tier_interleave[1])
 			me->il_count = 0;
 	} else {
-		next = next_node_in(me->il_prev, policy->nodes);
+		next = next_node_in(me->il_prev, policy->v.nodes);
 	}
 	if (next < MAX_NUMNODES)
 		me->il_prev = next;
@@ -2051,13 +2051,13 @@ static unsigned offset_il_node(struct mempolicy *pol, unsigned long n)
 		 * When N:M interleaving is configured, calculate a
 		 * virtual target for @n in an N:M-scaled nodelist...
 		 */
-		for_each_node_mask(nid, nodemask)
+		for_each_node_mask(nid, pol->v.nodes)
 			vnnodes += numa_tier_interleave[!node_is_toptier(nid)];
 		vtarget = (int)((unsigned int)n % vnnodes);
 
 		/* ...then map it back to the physical nodelist */
 		target = 0;
-		for_each_node_mask(nid, nodemask) {
+		for_each_node_mask(nid, pol->v.nodes) {
 			vtarget -= numa_tier_interleave[!node_is_toptier(nid)];
 			if (vtarget < 0)
 				break;
