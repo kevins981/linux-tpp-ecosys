@@ -1,0 +1,10 @@
+diff a/mm/mempolicy.c b/mm/mempolicy.c	(rejected hunks)
+@@ -2466,7 +2466,7 @@ static void sp_free(struct sp_node *n)
+  * Policy determination "mimics" alloc_page_vma().
+  * Called from fault path where we know the vma and faulting address.
+  */
+-int mpol_misplaced(struct page *page, struct vm_area_struct *vma, unsigned long addr)
++int mpol_misplaced(struct page *page, struct vm_area_struct *vma, unsigned long addr, int flags)
+ {
+ 	struct mempolicy *pol;
+ 	struct zoneref *z;
